@@ -1,7 +1,4 @@
-package de.lab4.mysql.first;
-
 import java.sql.*;
-import java.util.Date;
 import java.util.Scanner;
 
 public class Main {
