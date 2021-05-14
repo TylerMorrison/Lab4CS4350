@@ -109,24 +109,57 @@ public class Main {
             			stops(sTripNumber);
             			break;
             			
-            		case "weekly-schedule": 
-            			weeklySchedule();
+            		case "weekly-schedule":
+            			System.out.print("DriverName: ");
+            			String wsDriverName = scanner.nextLine().trim();
+            			
+            			System.out.print("Date 'YYYY-MM-DD': ");
+            			String wsDate = scanner.nextLine().trim();
+            			
+            			weeklySchedule(wsDriverName, wsDate);
             			break;
             			
-            		case "add-drive": 
-            			addDrive();
+            		case "add-drive":
+            			System.out.print("DriverName: ");
+            			String adDriverName = scanner.nextLine().trim();
+            			
+            			System.out.print("DriverTelephoneNumber: ");
+            			String adTelephone = scanner.nextLine().trim();
+            			
+            			addDrive(adDriverName, adTelephone);
             			break;
             			
             		case "add-bus": 
-            			addBus();
+            			System.out.print("BusID: ");
+            			int abBusID = scanner.nextInt();
+            			
+            			System.out.print("Model: ");
+            			String abModel = scanner.nextLine().trim();
+            			
+            			System.out.print("Year: ");
+            			int cbYear = scanner.nextInt();
+            			
+            			addBus(abBusID, abModel, cbYear);
             			break;
             			
             		case "delete-bus": 
-            			deleteBus();
+            			System.out.print("BusID: ");
+            			int dbBusID = scanner.nextInt();
+            			
+            			deleteBus(dbBusID);
             			break;
             			
-            		case "insert-trip": 
-            			insertTrip();
+            		case "insert-trip":
+            			System.out.print("TripNumber: ");
+            			int itTripNum = scanner.nextInt();
+            			
+            			System.out.print("Date 'YYYY-MM-DD': ");
+            			String itDate = scanner.nextLine().trim();
+            			
+            			System.out.print("Scheduled Start Time: ");
+            			String itStart = scanner.nextLine().trim();
+            			
+            			insertTrip(itTripNum, itDate, itStart);
             			break;
             			
             		default:
@@ -322,24 +355,164 @@ public class Main {
 		} 
     }
     
-    private static void weeklySchedule() {
-    	
+    private static void weeklySchedule(String driverName, String date) {
+    	String query = "SELECT Date, ScheduledStartTime, ScheduledArrivalTime " +
+    					"FROM TripOffering WHERE DriverName = '" + driverName + 
+    					"' AND Date BETWEEN '" + date + "' AND DATEADD(day, 7, '" + date + "')";
+    	try {
+    		ResultSet result = statement.executeQuery(query);
+    		ResultSetMetaData resultCol = result.getMetaData();
+    		
+    		for (int i=1; i<=resultCol.getColumnCount(); i++) {
+    			System.out.print(resultCol.getColumnName(i)+"\t");
+    		}
+    		System.out.println(" ");
+    		
+    		while (result.next()) {
+    			for(int i=1; i<=resultCol.getColumnCount(); i++) {
+    				System.out.print(result.getString(i)+"\t");
+    			}
+    			System.out.println(" ");
+    			System.out.println("---------------------------------------------------------------------");
+    		}
+    		
+    		result.close();
+    	} catch (SQLException e) {
+    		System.out.println(e);
+    	}
     }
     
-    private static void addDrive() {
-    	
+    private static void addDrive(String driverName, String telephone) {
+    	boolean adding = true;
+    	while (adding) {
+	    	String query = "INSERT INTO Driver (DriverName, DriverTelephoneNumber) " +
+	    					"VALUES ('" + driverName + "', '" + telephone + "')";
+	    	try {
+	    		int result = statement.executeUpdate(query);
+	    		System.out.println(result);
+	    	}
+	    	catch (SQLException e) {
+	    		System.out.println(e);
+	    	}
+	    	System.out.println("---------------------------------------------------------------------");
+	    	
+	    	System.out.print("Want to add another trip offerin? (yes/no): ");
+	    	String input = scanner.nextLine();
+	    	input = input.trim().toLowerCase();
+	    	if (input.equals("y") || input.equals("yes")) {
+	    		System.out.print("DriverName: ");
+    			driverName = scanner.nextLine().trim();
+    			
+    			System.out.print("DriverTelephoneNumber: ");
+    			telephone = scanner.nextLine().trim();
+	    	}
+	    	else {
+	    		adding = false;
+	    	}
+    	}
     }
     
-    private static void addBus() {
-    	
+    private static void addBus(int busID, String model, int year) {
+    	boolean adding = true;
+    	while (adding) {
+	    	String query = "INSERT INTO Bus (BusID, Model, Year)" + 
+	    					"VALUES ('" + busID + "', '" + model + "', '" +
+	    					year + "')";
+	    	try {
+	    		int result = statement.executeUpdate(query);
+	    		System.out.println(result);
+	    	}
+	    	catch (SQLException e) {
+	    		System.out.println(e);
+	    	}
+	    	System.out.println("---------------------------------------------------------------------");
+	    	
+	    	System.out.print("Want to add another trip offerin? (yes/no): ");
+	    	String input = scanner.nextLine();
+	    	input = input.trim().toLowerCase();
+	    	if (input.equals("y") || input.equals("yes")) {
+	    		System.out.print("BusID: ");
+    			busID = scanner.nextInt();
+    			
+    			System.out.print("Model: ");
+    			model = scanner.nextLine().trim();
+    			
+    			System.out.print("Year: ");
+    			year = scanner.nextInt();
+	    	}
+	    	else {
+	    		adding = false;
+	    	}
+    	}
     }
     
-    private static void deleteBus() {
-    	
+    private static void deleteBus(int busID) {
+    	String query = "DELETE BUS " +
+    					"WHERE BusID = '" + busID + "'";
+    	try {
+    		int result = statement.executeUpdate(query);
+    		if(result == 0)
+    			System.out.println("Could not delete the specified trip offering!");
+    		else
+    			System.out.println("Successfully deleted!");
+    		System.out.println("---------------------------------------------------------------------");
+    	} catch (SQLException e) {
+    		System.out.println(e);
+    	}
     }
     
-    private static void insertTrip() {
-    	
+    private static void insertTrip(int tripNum, String date, String startTime) {
+    	String query = "SELECT ScheduledArrivalTime FROM TripOffering " +
+    					"WHERE TripNumber = " + tripNum + " AND Date = '" +
+    					date + "' AND ScheduledStartTime = '" + startTime + "'";
+    	try {
+    		String arrivalTime = "";
+    		ResultSet result = statement.executeQuery(query);
+    		if (result.next()) {
+    			arrivalTime = result.getString(1);
+    			System.out.print("Number of Stops: ");
+    			int stops = scanner.nextInt();
+    			for (int i=1; i<=stops; i++) {
+    				String tempArr;
+    				if (i == stops) {
+    					System.out.println("Scheduled Arrival Time for stop " + 
+    										stops + " is " + arrivalTime);
+    					tempArr = arrivalTime;
+    				}
+    				else {
+    					System.out.print("Scheduled Arrival Time For Stop " + i + ": ");
+    					tempArr = scanner.nextLine().trim();
+    				}
+    				
+    				System.out.print("Actual Start Time For Stop " + i + ": ");
+    				String actStart = scanner.nextLine().trim();
+    				
+    				System.out.print("Actual Arrival Time For Stop " + i + ": ");
+    				String actArr = scanner.nextLine().trim();
+    				
+    				System.out.print("Number of Passengers In For Stop " + i + ": ");
+    				int enter = scanner.nextInt();
+    				
+    				System.out.print("Number of Passengers Out For Stop " + i + ": ");
+    				int exit = scanner.nextInt();
+    				
+    				query = "INSERT INTO ActualTripStopInfo VALUES('" + tripNum + 
+    						"', '" + date + "', '" + startTime + "', '" + i +
+    						"', '" + tempArr + "', '" + actStart + "', '" +
+    						actArr + "', '" + enter + "', '" + exit + "')";
+    				int res = statement.executeUpdate(query);
+    	    		System.out.println(res);
+    			}
+    			
+    			
+    		}
+    		else {
+    			System.out.println("Trip Offering with provided Key does not exist.");
+    		}
+    		System.out.println("---------------------------------------------------------------------");
+    	} catch (SQLException e) {
+    		System.out.println(e);
+    	}
     }
     
     
